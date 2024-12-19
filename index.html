@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Me Anything</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1 id="header-title">Welcome to Ask Me Anything</h1>
+        <p id="header-description">Get help with our services and find answers to your questions.</p>
+    </header>
+
+    <main>
+        <section class="content">
+            <h2 id="about-us-title">About Us</h2>
+            <p id="about-us-description">This is a demo site where you can ask questions and get responses from a chatbot integrated with GPT-4 and custom video links.</p>
+        </section>
+    </main>
+
+    <div id="chat">
+        <div id="chat-header">
+            <span id="chat-title">Ask Me Anything</span>
+            <span id="close-chat">&#10005;</span>
+        </div>
+        <div id="messages" class="chat-messages"></div>
+        <div id="input-area">
+            <input id="message" type="text" autocomplete="off" placeholder="Type a message..." />
+            <button id="send">Send</button>
+        </div>
+    </div>
+
+    <div id="message-icon" title="Ask Praxis Chatbot"></div>
+    <div id="video-container" style="display:none;">
+        <div id="video-frame-container">
+            <iframe id="video-frame" width="560" height="315" frameborder="0" allowfullscreen></iframe>
+            <span id="cancel-video">&#10005;</span>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                socket.send('User has connected!');
+            });
+
+            socket.on('message', function(data) {
+                var messages = data.messages;
+                messages.forEach(function(message) {
+                    if (message.role === 'user') {
+                        $('#messages').append('<p class="user-message"><strong>You:</strong> ' + message.content + '</p><hr>');
+                    } else if (message.role === 'bot') {
+                        $('#messages').append('<p class="bot-message"><strong>Bot:</strong> ' + message.content + '</p><hr>');
+                    } else if (message.role === 'system') {
+                        $('#messages').append('<p class="system-message"><strong>System:</strong> ' + message.content + '</p><hr>');
+                    }
+                });
+                var chatArea = document.getElementById('messages');
+                chatArea.scrollTop = chatArea.scrollHeight;
+            });
+
+            $('#send').on('click', function() {
+                var message = $('#message').val();
+                if (message) {
+                    socket.send(message);
+                    $('#message').val('');
+                }
+            });
+
+            $('#message').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#send').click();
+                }
+            });
+
+            $('#message-icon').on('click', function() {
+                $('#chat').toggle();
+            });
+
+            $('#close-chat').on('click', function() {
+                $('#chat').hide();
+            });
+
+            $(document).on('click', '.video-link', function(e) {
+                e.preventDefault();
+                var link = $(this).data('link');
+                $('#video-frame').attr('src', link);
+                $('#video-container').show();
+            });
+
+            $('#cancel-video').on('click', function() {
+                $('#video-frame').attr('src', '');
+                $('#video-container').hide();
+            });
+        });
+
+        // Language detection and translation
+        function translatePage(lang) {
+            if (lang === 'el') {
+                document.getElementById('header-title').innerText = 'Καλώς ήλθατε στο Ρωτήστε Οτιδήποτε';
+                document.getElementById('header-description').innerText = 'Λάβετε βοήθεια με τις υπηρεσίες μας και βρείτε απαντήσεις στις ερωτήσεις σας.';
+                document.getElementById('about-us-title').innerText = 'Σχετικά με εμάς';
+                document.getElementById('about-us-description').innerText = 'Αυτός είναι ένας ιστότοπος επίδειξης όπου μπορείτε να κάνετε ερωτήσεις και να λάβετε απαντήσεις από ένα chatbot ενσωματωμένο με το GPT-4 και προσαρμοσμένους συνδέσμους βίντεο.';
+                document.getElementById('chat-title').innerText = 'Ρωτήστε Οτιδήποτε';
+                document.getElementById('message').setAttribute('placeholder', 'Πληκτρολογήστε ένα μήνυμα...');
+                document.getElementById('send').innerText = 'Στείλετε';
+            } else {
+                document.getElementById('header-title').innerText = 'Welcome to Ask Me Anything';
+                document.getElementById('header-description').innerText = 'Get help with our services and find answers to your questions.';
+                document.getElementById('about-us-title').innerText = 'About Us';
+                document.getElementById('about-us-description').innerText = 'This is a demo site where you can ask questions and get responses from a chatbot integrated with GPT-4 and custom video links.';
+                document.getElementById('chat-title').innerText = 'Ask Me Anything';
+                document.getElementById('message').setAttribute('placeholder', 'Type a message...');
+                document.getElementById('send').innerText = 'Send';
+            }
+        }
+
+        // Example of setting language based on user input
+        function setLanguageBasedOnInput(input) {
+            // Assume detectLanguage is a function that detects language based on input
+            var lang = detectLanguage(input);
+            translatePage(lang);
+        }
+    </script>
+</body>
+</html>
