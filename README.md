@@ -1,4 +1,4 @@
-Overview
+
 This project is a chatbot application built using Flask, Flask-SocketIO, and OpenAI's GPT-4 model. The application processes user queries, detects language, and provides intelligent responses by leveraging a combination of predefined FAQ data, video descriptions, chapter summaries, and OpenAI's API. It supports both English and Greek languages.
 
 Key Features
